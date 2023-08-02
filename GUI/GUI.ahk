@@ -53,7 +53,7 @@ gui_spawn:
     Gui, Font, s11, Segoe UI
     Gui, Add, Text, %gui_control_options% vgui_main_title, ¯\_(ツ)_/¯
     Gui, Font, s10, Segoe UI
-    Gui, Add, Edit, %gui_control_options% vPedersen gFindus
+    Gui, Add, Edit, %gui_control_options% vinput gCallback
     Gui, Show,, myGUI
     return
 
@@ -66,7 +66,7 @@ GuiEscape:
     return
 
 ; The callback function when the text changes in the input field.
-Findus:
+Callback:
     Gui, Submit, NoHide
     #Include %A_ScriptDir%\GUI\UserCommands.ahk
     return
@@ -118,7 +118,7 @@ gui_search_add_elements:
     Gui, Add, Text, %gui_control_options% %cYellow%, %gui_search_title%
     Gui, Add, Edit, %gui_control_options% %cYellow% vgui_SearchEdit -WantReturn
     Gui, Add, Button, x-10 y-10 w1 h1 +default ggui_SearchEnter ; hidden button
-    GuiControl, Disable, Pedersen
+    GuiControl, Disable, input
     Gui, Show, AutoSize
     return
 
@@ -172,12 +172,12 @@ gui_commandlibrary:
     StringCaseSense, Off ; Matching to both if/If in the IfInString command below
     Loop, read, %A_ScriptDir%/GUI/UserCommands.ahk
     {
-        ; search for the string If Pedersen =, but search for each word individually because spacing between words might not be consistent. (might be improved with regex)
+        ; search for the string If input =, but search for each word individually because spacing between words might not be consistent. (might be improved with regex)
         If Substr(A_LoopReadLine, 1, 1) != ";" ; Do not display commented commands
         {
             If A_LoopReadLine contains if
             {
-                IfInString, A_LoopReadLine, Pedersen
+                IfInString, A_LoopReadLine, input
                     IfInString, A_LoopReadLine, =
                     {
                         StringGetPos, setpos, A_LoopReadLine,=
@@ -212,11 +212,64 @@ gui_commandlibrary:
     return
 ;----------------------------------------------------------------------------
 
-getName() {
-	Random, rand, 1, 10
-    names := ["Simon", "John", "Mikkel", "Christoffer", "Maj", "Louise","Loke", "Asger","Christian", "Joakim", "Niels"]
-	return rand . names[rand]
+getPlace() {
+	places := []
+
+	FileRead, tFile, %A_ScriptDir%\GUI\places.txt
+
+	;fill the array with lines of text
+	loop, parse, tFile, `,
+		places.push(A_LoopField)
+
+	Random, rand, 1, places.MaxIndex()
+
+	return places[rand]
 }
+
+:*:place`t::
+	output := getPlace()
+	SendInput, % output
+return
+
+getLastName() {
+	names := []
+
+	FileRead, tFile, %A_ScriptDir%\GUI\last-names.txt
+
+	;fill the array with lines of text
+	loop, parse, tFile, `,
+		names.push(A_LoopField)
+
+	Random, rand, 1, names.MaxIndex()
+
+	return names[rand]
+}
+
+:*:ln`t::
+	output := getLastName()
+	SendInput, % output
+return
+
+getFirstName() {
+	names := []
+
+	FileRead, tFile, %A_ScriptDir%\GUI\first-names.txt
+
+	;fill the array with lines of text
+	loop, parse, tFile, `,
+		names.push(A_LoopField)
+
+	Random, rand, 1, names.MaxIndex()
+
+	return names[rand]
+}	
+
+:*:fn`t::
+	output := getFirstName()
+	SendInput, % output
+return
+
+
 
 :*:plog`t::
 SendInput, Registry::getSystemLog()->info(print_r([$], true));
@@ -250,7 +303,11 @@ return
 	Send {enter};
 return
 
-:*:name`t::
-	output := getName()
-	SendInput, % output
+:*:@`t::
+	SendInput, simon.588.jorgensen@gmail.com
 return
+
+:*:ad`t::
+	SendInput, Frederiksdalsvej 105e 1. tv 2830 Virum
+return
+
